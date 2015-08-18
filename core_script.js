@@ -1,11 +1,29 @@
 $(document).ready(function(){
 
+// Global variables
+//
+var gSearchLang
+var gSearchString
+
+// search word
+// search language
+// translate sorting format
+// translate language
+// Explain word
+// Explaing language
+
+
     var scrolled = 0;
     var Langs = new Array();
 
     // set up Personal list of favorit Languages and sort it
-    var personalLangs = new Array("en","es","ca","ast","an","la","simple","oc","af","fr","it","nl","gl","eu","ext","frp","pt");
+    //var personalLangs = new Array("en","es","ca","ast","an","la","simple","oc","af","fr","it","nl","gl","eu","ext","frp","pt");
+    var personalLangs = JSON.parse(localStorage.getItem('preferredLang'));
+
+    // var personalLangs = new Array();
     personalLangs.sort();
+
+    localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
 
     var LangListByAlpha = new Array();
     var LangAbbrv = new Object();
@@ -20,7 +38,7 @@ $(document).ready(function(){
     loadRandomPage();
     setVerticalGrid();
 
-    // *******  Layout-related functions  ********* //
+    // ******* SETTING-UP  ********* //
 
     function setLayout(){
         setSearchHeight();
@@ -35,30 +53,30 @@ $(document).ready(function(){
 
 
     function setSearchHeight(){
-        var offsetHeight = window.innerHeight -  $("#sectionHead").outerHeight(true) + "px";
+        var offsetHeight = window.innerHeight -  $("#navHead").outerHeight(true) + "px";
         searchResults.style.height = offsetHeight;
     }
 
     function setTranslateHeight(){
-        var offsetHeight = window.innerHeight -  $("#sectionHead").outerHeight(true) - $("#translatedWord").outerHeight(true) + "px";
+        var offsetHeight = window.innerHeight -  $("#navHead").outerHeight(true) - $("#translatedWord").outerHeight(true) + "px";
         listResults.style.height = offsetHeight;
     }
 
     function setExplainHeight(){
-        var offsetHeight = window.innerHeight -  $("#sectionHead").outerHeight(true) - $("#translatePage").outerHeight(true)  +  "px";
+        var offsetHeight = window.innerHeight -  $("#navHead").outerHeight(true) - $("#translatePage").outerHeight(true)  +  "px";
         contentBlocks.style.height = offsetHeight;
     }
 
 
     function setReviewHeight(){
-        var offsetHeight = window.innerHeight -  $("#sectionHead").outerHeight(true)  + "px";
+        var offsetHeight = window.innerHeight -  $("#navHead").outerHeight(true)  + "px";
         historyList.style.height = offsetHeight;
     }
 
     function setVerticalGrid(){
-        resultingWidth = window.innerWidth - $("#navCol").outerWidth(true) - $("#leftCol").outerWidth(true)  - $("#CenterCol").outerWidth(true) - $("#reviewCol").outerWidth(true) + "px" ;
-        // console.log('x'+$('#rightCol').css('padding-right').replace("px", ""));
-        rightCol.style.width = resultingWidth;
+        resultingWidth = window.innerWidth - $("#navCol").outerWidth(true) - $("#searchCol").outerWidth(true)  - $("#translateCol").outerWidth(true) - $("#reviewCol").outerWidth(true) + "px" ;
+        // console.log('x'+$('#explainCol').css('padding-right').replace("px", ""));
+        explainCol.style.width = resultingWidth;
     }
 
     window.onresize = function(event) {
@@ -144,15 +162,17 @@ $(document).ready(function(){
         } else {
             langAbbr = $(this).text();
             fullLanguage = findLangAbbr(langAbbr)
-            // add language to list
             if (personalLangs.indexOf(langAbbr)==(-1)) {
+                // add language to personalLangs
                 personalLangs.push(langAbbr);
                 $(this).attr('class','transAbbrvLinkPersonal');
             }else{
+                // remove language from personalLangs
                 var index = personalLangs.indexOf(langAbbr);
                 personalLangs.splice(index,1);
                 $(this).attr('class','transAbbrvLink');
             }
+            localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
         };
     });
 
@@ -208,7 +228,7 @@ $(document).ready(function(){
 
     // LANGUAGE LIST FUNCTIONS //
 
-    // measure the lenght of the array
+    // measure the lenght of an array object
     function lengthArray(obj) {
         var c = 0;
         for (var key in obj) {
@@ -317,7 +337,6 @@ $(document).ready(function(){
     }
 
 
-
     // getSearchLang from search pull down
     function getSearchLang(){
         var lang = 	$("#searchLang").find(":selected").val();
@@ -339,7 +358,7 @@ $(document).ready(function(){
         // scroll up the div
         if ($('#searchResults').scrollTop() !=0){
             scrolled = scrolled - 300;
-            $("#searchResults").stop().animate({
+            $('#searchResults').stop().animate({
             scrollTop: scrolled
             });
         }
@@ -351,14 +370,14 @@ $(document).ready(function(){
         };
 
         if (varName == null){
-            var tempSearchTerm = $("#searchString").val();
+            var tempSearchResult = $("#searchString").val();
         } else {
-            var tempSearchTerm = varName;
+            var tempSearchResult = varName;
         };
 
-        if (tempSearchTerm.length > 0) {
-            var fullUrl = "https://" + lang + ".wikipedia.org/w/api.php?format=json&action=query&list=allpages&apfrom=" + tempSearchTerm + "&aplimit=100"
-            var fullUrlXml = "https://" + lang + ".wikipedia.org/w/api.php?format=xml&action=query&list=allpages&apfrom=" + tempSearchTerm + "&aplimit=100"
+        if (tempSearchResult.length > 0) {
+            var fullUrl = "https://" + lang + ".wikipedia.org/w/api.php?format=json&action=query&list=allpages&apfrom=" + tempSearchResult + "&aplimit=100"
+            var fullUrlXml = "https://" + lang + ".wikipedia.org/w/api.php?format=xml&action=query&list=allpages&apfrom=" + tempSearchResult + "&aplimit=100"
             $.ajax({
                 type: "GET",
                 url: fullUrl,
@@ -369,7 +388,7 @@ $(document).ready(function(){
                     $.each(jsonData.query.allpages, function(i) {
                         var pageName = jsonData.query.allpages[i].title;
                         var pageId = jsonData.query.allpages[i].pageid;
-                        $("#searchResults").append('<div class="searchTerm"><a href="#" class="searchResultLink" pageid='+ pageId +' wikiLang="' + lang+'" >'+ pageName +'</a></div>');
+                        $("#searchResults").append('<div class="searchResult"><a href="#" class="searchResultLink" pageid='+ pageId +' wikiLang="' + lang+'" >'+ pageName +'</a></div>');
                     });
 
                     // $("#searchResults").append('</br>[W.' +  lang + ']:<a href="' + fullUrlXml + '" target="_new">XML</a>|<a href="' + fullUrl + '" target="_new">JSON</a></br></br>');
@@ -386,7 +405,7 @@ $(document).ready(function(){
     }
 
 
-    // ****  GET TRANSLATION ******
+    // ****  TRANSLATE  ******
 
     function translateWord(varName,varLang){
 

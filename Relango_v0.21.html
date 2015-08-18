@@ -10,19 +10,19 @@
     <body>
         <div id="contentwrapper">
 
-            <!-- Navigation Column -->
+            <!-- NAVIGATE Column -->
 
             <div id="navCol">
-                <div id='sectionHead' style="padding-left:5px">
-                    <img id="logoButton" src="img/icon_logo_grey.svg" style="padding-left:5px" onMouseOver="this.src='img/icon_logo_grey_hover.svg'" onmouseout="this.src='img/icon_logo_grey.svg'"></img>
+                <div class='sectionHead' id="navHead">
+                    <img id="logoButton" src="img/icon_logo_grey.svg" style="padding-left:5px" onMouseOver="this.src='img/icon_logo_grey_hover.svg'" onmouseout=""ut="this.src='img/icon_logo_grey.svg'"></img>
                 </div>
             </div>
 
-            <!--  Search results Column -->
+            <!--  SEARCH Column -->
 
-            <div id="leftCol" class="leftCol">
-                  <div id='sectionHead'>
-                  <span id="searchLabel">Search</span> <input type="text" id="searchString" autofocus></br>
+            <div id="searchCol">
+                  <div class='sectionHead' id='searchHead'>
+                  <span class='sectionLabel' id="searchLabel">Search</span> <input type="text" id="searchString" autofocus></br>
                      in
                     <select id="searchLang">
                           <!-- <option value="en" selected>English</option>  -->
@@ -31,11 +31,11 @@
                  <div id="searchResults"></div>
             </div>
 
-            <!--  Translation Column -->
+            <!--  TRANSLATE Column -->
 
-            <div id="CenterCol">
-                <div id='sectionHead'>
-                     <span id="transLabel">Translate</span> & sort by
+            <div id="translateCol">
+                <div class='sectionHead' id='translateHead'>
+                     <span class='sectionLabel' id="transLabel">Translate</span> & sort by
                      <select id="sortBy">
                           <option value="alpha" selected>Alphabet</option>
                           <option value="familyLang">Language Family</option>
@@ -48,11 +48,11 @@
             </div>
 
 
-            <!-- Content Column -->
+            <!-- EXPLAIN Column -->
 
-            <div id="rightCol">
-                <div id='sectionHead'>
-                    <span id="explainLabel">Explain</span> with <a href="#wikiTextAnchor">text <span id="wikiReadingTime"></span></a>| <a href="#imageAnchor">images <span id="wikiImgCounter"></span></a>| <a href="#wikiConcepts">Concepts <span id="wikiConceptsCounter"></span></a>| <a href="#weblinks">Weblinks (0)</a> | <a href="#wikiBooks">Books (0)</a> | <a href="#wikiMedia">Media (0)</a> | <a href="#locationAnchor">Locations (1)</a> | <a href="#wiktionaryAnchor">Definition (0)</a>
+            <div id="explainCol">
+                <div class='sectionHead' id='explainHead'>
+                    <span class='sectionLabel' id="explainLabel">Explain</span> with <a href="#wikiTextAnchor">text <span id="wikiReadingTime"></span></a>| <a href="#imageAnchor">images <span id="wikiImgCounter"></span></a>| <a href="#wikiConcepts">Concepts <span id="wikiConceptsCounter"></span></a>| <a href="#weblinks">Weblinks (0)</a> | <a href="#wikiBooks">Books (0)</a> | <a href="#wikiMedia">Media (0)</a> | <a href="#locationAnchor">Locations (1)</a> | <a href="#wiktionaryAnchor">Definition (0)</a>
                 </div>
 
                 <!-- Title of the translated page -->
@@ -127,11 +127,11 @@
                 </div>
             </div>
 
-            <!-- Review Column -->
+            <!-- REVIEW Column -->
 
             <div id="reviewCol">
-                <div id='sectionHead'>
-                    <span id="reviewLabel">Review</span> previous keywords <a id="clearHistory" href="#"> clear history </a>
+                <div class='sectionHead' id='reviewHead'>
+                    <span class='sectionLabel' id="reviewLabel">Review</span> previous keywords <a id="clearHistory" href="#"> clear history </a>
                 </div>
                 <div id="historyList">
                 </div>
