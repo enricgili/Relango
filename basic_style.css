@@ -321,6 +321,13 @@ img{
 #explainHead{
 }
 
+.explainIcon{
+    width: 16px;
+    height: 16px;
+    padding-right: 3px;
+    margin-bottom: -3px;
+}
+
 #explainLabel{
     color:#FFF;
     background-color: #15BFA6;

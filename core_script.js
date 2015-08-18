@@ -1,9 +1,9 @@
 $(document).ready(function(){
 
-// Global variables
-//
-var gSearchLang
-var gSearchString
+    // Global variables
+    //
+    var gSearchLang = "";
+    var gSearchString = "";
 
 // search word
 // search language
@@ -75,7 +75,6 @@ var gSearchString
 
     function setVerticalGrid(){
         resultingWidth = window.innerWidth - $("#navCol").outerWidth(true) - $("#searchCol").outerWidth(true)  - $("#translateCol").outerWidth(true) - $("#reviewCol").outerWidth(true) + "px" ;
-        // console.log('x'+$('#explainCol').css('padding-right').replace("px", ""));
         explainCol.style.width = resultingWidth;
     }
 
@@ -96,18 +95,19 @@ var gSearchString
     });
 
     $(document).keypress(function(e){
+        var $searchString = $('#searchSting');
         var character = String.fromCharCode(e.which);
-        if ($("#searchString").is(':focus')){
+        if ($searchString.is(':focus')){
             if ( e.which == 13 ){
                 translateWord();
                 fillContent();
-                tempString = $("#searchString").val();
-                $("#searchString").val(tempString + ' ');
+                tempString = $searchString.val();
+                $searchString.val(tempString + ' ');
             };
         } else {
-            tempString = $("#searchString").val();
-            $("#searchString").val(tempString + ' ');
-            $("#searchString").focus();
+            tempString = $searchString.val();
+            $searchString.val(tempString + ' ');
+            $searchString.focus();
         };
     });
 
@@ -339,7 +339,7 @@ var gSearchString
 
     // getSearchLang from search pull down
     function getSearchLang(){
-        var lang = 	$("#searchLang").find(":selected").val();
+        var lang = $("#searchLang").find(":selected").val();
         //alert ("We are going to search in " + lang);
         if (lang == null){
             return("en"); // EN is the default
@@ -445,7 +445,6 @@ var gSearchString
                             var wikiPageName = v.langlinks[x]["*"];
 
                             var wikiLangList = listWikiLang[wikiLang];
-
                             var famLangList = langFamList[wikiLang];
                             var subfamLangList = langSubFamList[wikiLang];
 
@@ -598,38 +597,51 @@ var gSearchString
             contentType: "application/json",
             dataType: "jsonp",
             success: function(jsonData){
-                var firstText = (" " + jsonData["parse"].text["*"] + " ");
-                var readingTimeMins= firstText.length/(30*130);
-                $('#wikiReadingTime').text('(' + Math.round(readingTimeMins) +' min)');
+                var htmlWikiText = jsonData["parse"]["text"]["*"];
+                var $wikiText = $(jsonData["parse"]["text"]["*"]);
+
+                // calculate reading time
+                var rawWikiText = $wikiText.text();
+                // note: average word length = 6 | words read per minute = 250-300
+                var readingTimeMins = ((rawWikiText.length/6)/250);
+                $('#wikiReadingTime').text('( ' + Math.ceil(readingTimeMins) + ' min)');
 
                 // **** Modify links ***
                 $('#wikiLinks').html('');
                 var linksArray = new Array();
-                var listLinks = $(firstText).find('a');
                 var linkCount = 0;
+                var listLinks = $wikiText.find('a');
+                var tempUniquelist = new Array();
                 listLinks.each(function(idx,li){
                     var theLink = $(this).attr('href');
                     var theText = $(this).text();
-                    if (theLink != null && theLink.indexOf("/wiki/")==0 && theLink.indexOf(':') === -1){
-                        var tempArray = [theText,theLink];
-                        linksArray.push(tempArray);
-                        linkCount = linkCount +1;
+                    if($.inArray(theLink,tempUniquelist)==-1){
+                    // if($.inArray(theText,tempUniquelist)==-1){
+                        if (theLink != null && theLink.indexOf("/wiki/")==0 && theLink.indexOf(':') === -1){
+                            // console.log(decodeURIComponent(theLink) + " " + theLink);
+                            var tempArray = [theText,decodeURIComponent(theLink)];
+                            linksArray.push(tempArray);
+                            linkCount = linkCount +1;
+                        };
+                        tempUniquelist.push(theLink);
                     };
                 });
-
+                tempUniquelist=[];
 
                 // Sort concept array alphabetically
-                var sortedList = linksArray.sort(function(a,b){ return a[0] > b[0] ? 1 : -1; });
+                var sortedList = linksArray.sort(function(a,b){ return a[1] > b[1] ? 1 : -1; });
                 var initialLetter = "";
                 $.each(sortedList, function( value ) {
-                    tempInitial = sortedList[value][0].charAt(0);
+                    tempInitial = sortedList[value][1].charAt(6);
                     if (initialLetter == tempInitial){
                     } else {
                         initialLetter = tempInitial;
                         $('#wikiLinks').append('<div class="conceptLinkTab">' + tempInitial + '</div></br>');
                     };
-                    wikiName = sortedList[value][1].replace("/wiki/","");
+                    wikiName = decodeURIComponent(sortedList[value][1].replace("/wiki/",""));
+                    // printedWikiName = decodeURIComponent(wikiName.replace(/_/g," "));
                     printedWikiName = decodeURIComponent(wikiName.replace(/_/g," "));
+                    // $('#wikiLinks').append('<div class="conceptLink"><a id="' +  wikiName + '">' + printedWikiName + '</a></div>');
                     $('#wikiLinks').append('<div class="conceptLink"><a id="' +  wikiName + '">' + printedWikiName + '</a></div>');
                 });
                 $('#wikiConceptsCounter').text('(' + linkCount +')');
@@ -637,14 +649,10 @@ var gSearchString
 
                 // Collect Images
                 $("#wikiImagesGallery").text("");
-                var elements = $(firstText);
-                var found = $("img", elements);
+                var found = $("img", $wikiText);
                 if (found != null){
                     $('#wikiImages').show();
                     for(u=0;u<found.length;u++){
-                        console.log(found[u].srcset);
-                        // console.log(found[u].alt);
-                        // console.log(found[u].src);
                         theSource = found[u].src.replace("file://","");
                         $("#wikiImagesGallery").append('<div class="wikiImageFrame"><img src="https://' + theSource + '" class="wikiImage"></img></div>');
                     }
@@ -655,8 +663,7 @@ var gSearchString
                 }
 
                 // Collect wikiPages — 'concepts'
-                var elements = $(firstText);
-                var found = $("a", elements);
+                var found = $("a", $wikiText);
                 if (found != null){
                     for(u=0;u<found.length;u++){
                     }
@@ -668,7 +675,10 @@ var gSearchString
 
                 // Find titles
                 var title = jsonData["parse"].title;
-                var text = firstText.replace(/src="\/\//g,'src="https://');
+                // var text = $wikiText.replace(/src="\/\//g,'src="https://');
+                var text = htmlWikiText;
+                var text = text.replace(/src="\/\//g,'src="https://');
+                var text = text.replace(/src="\/\//g,'src="https://');
                 var text = text.replace(/srcset="\/\//g,'src="https://');
                 var text = text.replace(/href="\/wiki/g,'href="https://'+lang+'.wikipedia.org/wiki');
                 var wikipediaLink = "https://" + lang + ".wikipedia.org/wiki/" + pageName;
