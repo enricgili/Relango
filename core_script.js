@@ -679,6 +679,7 @@ $(document).ready(function(){
                     $('#wikiImgCounter').text(' (0)');
                 }
 
+
                 //Collect external links
                 // var listLinks = document.getElementsByClassName("external text");
                 // for each (var item in listLinks) {
@@ -686,9 +687,28 @@ $(document).ready(function(){
                 // }
 
 
-                // Collect Coordinates
-                $.each($('.geodec'), function() {
-                });
+                // // Collect Coordinates
+                var geolocations = $wikiText.find('.geo-dec');
+                $geoFrames = $('#geoFrames');
+                $geoFrames.text('');
+
+                if(geolocations.length>0){
+                    for(u=0;u<geolocations.length;u++){
+                        var oneLocation = $(geolocations[u]).text();
+                        arrayLocation = oneLocation.split(" ");
+                        var latitude = arrayLocation[0];
+                        var longitude = arrayLocation[1];
+                        var geoHTMLstring = '<div id="geoMap"><a href="https://www.google.com/maps/place/' + latitude + ' ' + longitude + '" target="new"> #'+ u+' : ' +  latitude + ', ' + longitude + '</a></div>';
+                        $geoFrames.append(geoHTMLstring);
+                    }
+                    $('#wikiLocationsCounter').text('(' + geolocations.length + ')');
+                    $('#wikiMaps').show();
+                }else{
+                    $('#wikiMaps').hide();
+                    $('#wikiLocationsCounter').text(' (0)');
+                }
+
+
 
                 // Find titles
                 var title = jsonData["parse"].title;
@@ -753,11 +773,12 @@ $(document).ready(function(){
                     $("#definedWord").text("");
                     $("#definedWord").append('<b><a href="'+ wiktionaryLink +'" target="_new">' + dictTitle + '</a></b> in '+ findLangAbbr(lang) +' <a href="#"> [Translate]</a> ');
                     $("#definition").append(textFinal + "</br>");
-
+                    $('#wikiDefineCounter').text('(1)');
                 } else {
                     $("#definedWord").text("");
                     $("#definedWord").append('<b><a href="'+ wiktionaryLink +'" target="_new">' + dictPageName + '</a></b> in '+ findLangAbbr(lang) +' <a href="#"> [Translate]</a>');
                     $("#definition").append("<i>This word is not defined yet in the ("+  lang  +") wiktionary.</i></br></br>");
+                    $('#wikiDefineCounter').text('(0)');
 
                     // suggest pages //
                     // https://en.wiktionary.org/w/api.php?format=json&action=query&list=allpages&apfrom=cod10&aplimit=40
@@ -790,6 +811,7 @@ $(document).ready(function(){
             },
             error: function(){
                 $("#definedWord").append("Couldn't find " + dictTitle + " in the wiktionary");
+                $('#wikiDefineCounter').text('(0)');
             }
         });
     }
