@@ -600,10 +600,9 @@ $(document).ready(function(){
                 var htmlWikiText = jsonData["parse"]["text"]["*"];
                 var $wikiText = $(jsonData["parse"]["text"]["*"]);
 
-                // calculate reading time
+                // Calculate reading time (note: average word length ~ 5 | average words read per minute = 250-300)
                 var rawWikiText = $wikiText.text();
-                // note: average word length = 6 | words read per minute = 250-300
-                var readingTimeMins = ((rawWikiText.length/6)/250);
+                var readingTimeMins = ((rawWikiText.length/5)/250);
                 $('#wikiReadingTime').text('( ' + Math.ceil(readingTimeMins) + ' min)');
 
                 // **** Modify links ***
@@ -616,9 +615,7 @@ $(document).ready(function(){
                     var theLink = $(this).attr('href');
                     var theText = $(this).text();
                     if($.inArray(theLink,tempUniquelist)==-1){
-                    // if($.inArray(theText,tempUniquelist)==-1){
                         if (theLink != null && theLink.indexOf("/wiki/")==0 && theLink.indexOf(':') === -1){
-                            // console.log(decodeURIComponent(theLink) + " " + theLink);
                             var tempArray = [theText,decodeURIComponent(theLink)];
                             linksArray.push(tempArray);
                             linkCount = linkCount +1;
@@ -628,33 +625,51 @@ $(document).ready(function(){
                 });
                 tempUniquelist=[];
 
-                // Sort concept array alphabetically
+                // Sort array alphabetically
                 var sortedList = linksArray.sort(function(a,b){ return a[1] > b[1] ? 1 : -1; });
-                var initialLetter = "";
+                var lastInitial = "";
+
+                var listLength = sortedList.length;
+                var HTMLstring = "";
+
                 $.each(sortedList, function( value ) {
                     tempInitial = sortedList[value][1].charAt(6);
-                    if (initialLetter == tempInitial){
-                    } else {
-                        initialLetter = tempInitial;
-                        $('#wikiLinks').append('<div class="conceptLinkTab">' + tempInitial + '</div></br>');
+                    if (lastInitial != tempInitial){
+                        if (value!=0){
+                                HTMLstring += "</div>"
+                            };
+                        HTMLstring += '<div class="letterSection"><div class="conceptLinkTab">' + tempInitial + '</div></br>';
+                        lastInitial = tempInitial;
                     };
                     wikiName = decodeURIComponent(sortedList[value][1].replace("/wiki/",""));
-                    // printedWikiName = decodeURIComponent(wikiName.replace(/_/g," "));
                     printedWikiName = decodeURIComponent(wikiName.replace(/_/g," "));
-                    // $('#wikiLinks').append('<div class="conceptLink"><a id="' +  wikiName + '">' + printedWikiName + '</a></div>');
-                    $('#wikiLinks').append('<div class="conceptLink"><a id="' +  wikiName + '">' + printedWikiName + '</a></div>');
+                    HTMLstring += '<div class="conceptLink"><a href="" id="' +  wikiName + '">' + printedWikiName + '</a></div>';
+                    if (value == (listLength-1)){
+                        HTMLstring += '</div>';
+                    };
                 });
+                $('#wikiLinks').append(HTMLstring);
                 $('#wikiConceptsCounter').text('(' + linkCount +')');
 
-
                 // Collect Images
-                $("#wikiImagesGallery").text("");
+                $wikiImagesGallery = $("#wikiImagesGallery");
+                $wikiImagesGallery.text("");
                 var found = $("img", $wikiText);
                 if (found != null){
                     $('#wikiImages').show();
                     for(u=0;u<found.length;u++){
                         theSource = found[u].src.replace("file://","");
-                        $("#wikiImagesGallery").append('<div class="wikiImageFrame"><img src="https://' + theSource + '" class="wikiImage"></img></div>');
+                        var linkHTMLopen = '';
+                        var linkHTMLclose = '';
+                        // if (found[u].srcset != null){
+                            srcSetArray = found[u].srcset.split(" ");
+                            fullRes = srcSetArray[2];
+                            if (fullRes != null){
+                                fullRes = fullRes.replace("//","http://");
+                                var linkHTMLopen = '<a href=' + fullRes + ' target="new">';
+                                var linkHTMLclose = '</a>';
+                            }
+                        $wikiImagesGallery.append('<div class="wikiImageFrame">'+ linkHTMLopen + '<img src="https://' + theSource + '" class="wikiImage"></img>'+ linkHTMLclose + '</div>');
                     }
                     $('#wikiImgCounter').text(' ('+found.length+')');
                 } else {
@@ -662,12 +677,12 @@ $(document).ready(function(){
                     $('#wikiImgCounter').text(' (0)');
                 }
 
-                // Collect wikiPages — 'concepts'
-                var found = $("a", $wikiText);
-                if (found != null){
-                    for(u=0;u<found.length;u++){
-                    }
-                }
+                //Collect external links
+                // var listLinks = document.getElementsByClassName("external text");
+                // for each (var item in listLinks) {
+                //     console.log(listLinks[item]);
+                // }
+
 
                 // Collect Coordinates
                 $.each($('.geodec'), function() {

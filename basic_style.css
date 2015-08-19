@@ -396,7 +396,11 @@ img{
     -webkit-column-break-inside: avoid;
     page-break-inside: avoid;
     break-inside: avoid;
+    -webkit-column-gap: 10px; /* Chrome, Safari, Opera */
+    -moz-column-gap: 10px; /* Firefox */
+    column-gap: 10px;
 }
+
 
 .conceptLink{
     /*background-color: rgb(230,230,230);*/
@@ -443,6 +447,14 @@ img{
     /*border-width: 1px;*/
     /*border-color: #15BFA6;*/
 }
+
+.letterSection{
+    /*border-style: dotted;*/
+    display: inline-block;
+    width: 100%;
+}
+
+
 
 /* DEFINE div */
 
