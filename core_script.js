@@ -15,15 +15,16 @@ $(document).ready(function(){
 
     var scrolled = 0;
     var Langs = new Array();
+    // var personalLangs = "";
 
     // set up Personal list of favorit Languages and sort it
-    //var personalLangs = new Array("en","es","ca","ast","an","la","simple","oc","af","fr","it","nl","gl","eu","ext","frp","pt");
-    var personalLangs = JSON.parse(localStorage.getItem('preferredLang'));
+    var personalLangs = new Array("en","es","ca","ast","an","la","simple","oc","af","fr","it","nl","gl","eu","ext","frp","pt");
+    // var personalLangs = JSON.parse(localStorage.getItem('preferredLang'));
 
     // var personalLangs = new Array();
     personalLangs.sort();
 
-    localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
+    // localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
 
     var LangListByAlpha = new Array();
     var LangAbbrv = new Object();
@@ -172,7 +173,7 @@ $(document).ready(function(){
                 personalLangs.splice(index,1);
                 $(this).attr('class','transAbbrvLink');
             }
-            localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
+            // localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
         };
     });
 
@@ -661,7 +662,7 @@ $(document).ready(function(){
                         theSource = found[u].src.replace("file://","");
                         var linkHTMLopen = '';
                         var linkHTMLclose = '';
-                        // if (found[u].srcset != null){
+                         if (found[u].srcset != null){
                             srcSetArray = found[u].srcset.split(" ");
                             fullRes = srcSetArray[2];
                             if (fullRes != null){
@@ -669,6 +670,7 @@ $(document).ready(function(){
                                 var linkHTMLopen = '<a href=' + fullRes + ' target="new">';
                                 var linkHTMLclose = '</a>';
                             }
+                        }
                         $wikiImagesGallery.append('<div class="wikiImageFrame">'+ linkHTMLopen + '<img src="https://' + theSource + '" class="wikiImage"></img>'+ linkHTMLclose + '</div>');
                     }
                     $('#wikiImgCounter').text(' ('+found.length+')');
