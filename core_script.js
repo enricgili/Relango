@@ -15,7 +15,6 @@ $(document).ready(function(){
 
     var scrolled = 0;
     var Langs = new Array();
-    // var personalLangs = "";
 
     // set up Personal list of favorit Languages and sort it
     var personalLangs = new Array("en","es","ca","ast","an","la","simple","oc","af","fr","it","nl","gl","eu","ext","frp","pt");
@@ -90,6 +89,7 @@ $(document).ready(function(){
         loadRandomPage();
     });
 
+    // >>>>>>>>>>>>>    SEARCH
 
    $('input[type=text]').click(function() {
         $(this).select();
@@ -123,31 +123,20 @@ $(document).ready(function(){
         fillContent();
     });
 
-
-    $('#historyList').on('click','a',function(){
-        if (event.target.className == ('langLink')){
-            var pageName = $(this).text();
-            var wikiLang = $(this).attr("id")
-            fillContent(pageName,wikiLang);
-        }
+    $("#searchLang").change(function() {
+        //alert( "language changed!" );
+        searchAhead();
+        translateWord();
+        fillContent();
     });
 
+    // >>>>>>>>>>>>>    TRANSLATE
 
-    $('#historyList').on('hover','a',function(){
+    $("#sortBy").change(function() {
+        //alert( "language changed!" );
+        translateWord();
+        //fillContent();
     });
-
-
-    $('#clearHistory').on('click',function(){
-        $('#historyList').empty();
-    });
-
-
-    $("#definition").on("click","a",function(){
-        var pageName = $(this).text();
-        var wikiLang = $(this).attr("idLang")
-        displayWiktionaryPage(pageName,wikiLang);
-    });
-
 
     $("#translatedWord").on("click","a",function(event){
         var pageName = $(this).text();
@@ -155,28 +144,51 @@ $(document).ready(function(){
         fillContent(pageName,wikiLang);
     });
 
-    $("#listResults").on("click","a",function(event){
-        if (event.target.className != ('transAbbrvLink') && event.target.className != ('transAbbrvLinkPersonal')){
-            var pageName = $(this).text();
-            var wikiLang = $(this).attr("id")
-            fillContent(pageName,wikiLang);
-        } else {
-            langAbbr = $(this).text();
-            fullLanguage = findLangAbbr(langAbbr)
-            if (personalLangs.indexOf(langAbbr)==(-1)) {
-                // add language to personalLangs
-                personalLangs.push(langAbbr);
-                $(this).attr('class','transAbbrvLinkPersonal');
-            }else{
-                // remove language from personalLangs
-                var index = personalLangs.indexOf(langAbbr);
-                personalLangs.splice(index,1);
-                $(this).attr('class','transAbbrvLink');
-            }
-            // localStorage.setItem('preferredLang',JSON.stringify(personalLangs));
-        };
+    $(document).on("mouseenter",'a.transAbbrvLink',function(){
+        var fullLangName = $(this).attr("fulllang");
+        $(this).text(fullLangName);
+        // console.log(fullLangName);
     });
 
+    $(document).on("mouseleave",'a.transAbbrvLink',function(){
+        var abbrvlLangName = $(this).attr("lang");
+        $(this).text(abbrvlLangName);
+        // console.log(fullLangName);
+    });
+
+    $(document).on("mouseenter",'a.transAbbrvLinkPersonal',function(){
+        var fullLangName = $(this).attr("fulllang");
+        $(this).text(fullLangName);
+        // console.log(fullLangName);
+    });
+
+    $(document).on("mouseleave",'a.transAbbrvLinkPersonal',function(){
+        var abbrvlLangName = $(this).attr("lang");
+        $(this).text(abbrvlLangName);
+        // console.log(fullLangName);
+    });
+
+    $(document).on("click",'a.langLink',function(){
+        var pageName = $(this).text();
+        var wikiLang = $(this).attr("id")
+        fillContent(pageName,wikiLang);
+    });
+
+    $(document).on("click",'a.transAbbrvLink',function(){
+        langAbbr = $(this).text();
+        personalLangs.push(langAbbr);
+        $(this).attr('class','transAbbrvLinkPersonal');
+    });
+
+    $(document).on("click",'a.transAbbrvLinkPersonal',function(){
+        var langAbbr = $(this).text();
+        var index = personalLangs.indexOf(langAbbr);
+        personalLangs.splice(index,1);
+        $(this).attr('class','transAbbrvLink');
+    });
+
+
+// >>>>>>>>>>>>>>>> EXPLAIN
 
     $("#translatePage").on("click",function(){
         var pageName = $(this).find("span").attr("id");
@@ -187,22 +199,6 @@ $(document).ready(function(){
         translateWord(pageName,pageLang);
         fillContent(pageName,pageLang);
     });
-
-
-    $("#searchLang").change(function() {
-        //alert( "language changed!" );
-        searchAhead();
-        translateWord();
-        fillContent();
-    });
-
-
-    $("#sortBy").change(function() {
-        //alert( "language changed!" );
-        translateWord();
-        //fillContent();
-    });
-
 
     // intercept clicks on pageContent div //
     $("#pageContent").click(function(event){
@@ -223,7 +219,27 @@ $(document).ready(function(){
         return false;
     });
 
+    // >>>>>>>>>>>>>>>> DEFINE with wiktionary
 
+    $("#definition").on("click","a",function(){
+        var pageName = $(this).text();
+        var wikiLang = $(this).attr("idLang")
+        displayWiktionaryPage(pageName,wikiLang);
+    });
+
+    // >>>>>>>>>>>>>>> REVIEW
+
+    $('#historyList').on('click','a',function(){
+        if (event.target.className == ('langLink')){
+            var pageName = $(this).text();
+            var wikiLang = $(this).attr("id")
+            fillContent(pageName,wikiLang);
+        }
+    });
+
+    $('#clearHistory').on('click',function(){
+        $('#historyList').empty();
+    });
 
     // *******  FUNCTIONS  ********* //
 
@@ -719,10 +735,13 @@ $(document).ready(function(){
                 var text = text.replace(/srcset="\/\//g,'src="https://');
                 var text = text.replace(/href="\/wiki/g,'href="https://'+lang+'.wikipedia.org/wiki');
                 var wikipediaLink = "https://" + lang + ".wikipedia.org/wiki/" + pageName;
-                $("#translatePage").text("");
-                $("#translatePage").append('<b><a href="'+ wikipediaLink + '" target="_new">' + title + '</a></b> in '+ findLangAbbr(lang) +'<b></b> ');
-                $("#translatePage").append('<a href="#"><span id="'+ title +'" id2="'+ lang +'">[translate]</span></a>');
                 $("#pageContent").append(text + "</br>");
+
+                // Add header on top of translated page
+                $translatePage = $("#translatePage");
+                $translatePage.text("");
+                $translatePage.append('<b><a href="'+ wikipediaLink + '" target="_new">' + title + '</a></b> in '+ findLangAbbr(lang) +'<b></b> ');
+                $translatePage.append('<a href="#"><span id="'+ title +'" id2="'+ lang +'">[translate]</span></a>');
 
                 //Set pixel height of explain Div
                 setExplainHeight();
