@@ -5,6 +5,7 @@ $(document).ready(function(){
     var gSearchLang = "";
     var gSearchString = "";
 
+
 // search word
 // search language
 // translate sorting format
@@ -63,7 +64,7 @@ $(document).ready(function(){
     }
 
     function setExplainHeight(){
-        var offsetHeight = window.innerHeight -  $("#navHead").outerHeight(true) - $("#translatePage").outerHeight(true)  +  "px";
+        var offsetHeight = window.innerHeight -  $("#navHead").outerHeight(true) - $("#subheaderExplain").outerHeight(true)  +  "px";
         contentBlocks.style.height = offsetHeight;
     }
 
@@ -83,13 +84,13 @@ $(document).ready(function(){
     }
 
 
-    // *******  Event driven functions  ********* //
+    // *******  EVENT-DRIVEN FUNCTIONS  ********* //
 
     $("#logoButton").click(function(){
         loadRandomPage();
     });
 
-    // >>>>>>>>>>>>>    SEARCH
+    // >>>>>>>>>>>>>    SEARCH events
 
    $('input[type=text]').click(function() {
         $(this).select();
@@ -113,7 +114,11 @@ $(document).ready(function(){
     });
 
     $(document).keyup(function(e){
-        searchAhead();
+        // CapitalizedString = capitalise($('#searchString').val());
+        // ('#searchString').val(CapitalizedString);
+        var searchTerm = $('#searchString').val();
+        var searchLang = getSearchLang();
+        searchAhead(searchTerm, searchLang);
     });
 
     $('#searchResults').on('click','a',function(){
@@ -124,13 +129,14 @@ $(document).ready(function(){
     });
 
     $("#searchLang").change(function() {
-        //alert( "language changed!" );
-        searchAhead();
+        var searchTerm = $('#searchString').val();
+        var searchLang = getSearchLang();
+        searchAhead(searchTerm, searchLang);
         translateWord();
         fillContent();
     });
 
-    // >>>>>>>>>>>>>    TRANSLATE
+    // >>>>>>>>>>>>>  TRANSLATE events
 
     $("#sortBy").change(function() {
         //alert( "language changed!" );
@@ -139,48 +145,49 @@ $(document).ready(function(){
     });
 
     $("#translatedWord").on("click","a",function(event){
+        event.preventDefault();
         var pageName = $(this).text();
         var wikiLang = $(this).attr("id")
         fillContent(pageName,wikiLang);
     });
 
-    $(document).on("mouseenter",'a.transAbbrvLink',function(){
+    $('#listResults').on("mouseenter",'.transAbbrvLink',function(){
         var fullLangName = $(this).attr("fulllang");
         $(this).text(fullLangName);
         // console.log(fullLangName);
     });
 
-    $(document).on("mouseleave",'a.transAbbrvLink',function(){
+    $('#listResults').on("mouseleave",'.transAbbrvLink',function(){
         var abbrvlLangName = $(this).attr("lang");
         $(this).text(abbrvlLangName);
         // console.log(fullLangName);
     });
 
-    $(document).on("mouseenter",'a.transAbbrvLinkPersonal',function(){
+    $('#listResults').on("mouseenter",'.transAbbrvLinkPersonal',function(){
         var fullLangName = $(this).attr("fulllang");
         $(this).text(fullLangName);
         // console.log(fullLangName);
     });
 
-    $(document).on("mouseleave",'a.transAbbrvLinkPersonal',function(){
+    $('#listResults').on("mouseleave",'.transAbbrvLinkPersonal',function(){
         var abbrvlLangName = $(this).attr("lang");
         $(this).text(abbrvlLangName);
         // console.log(fullLangName);
     });
 
-    $(document).on("click",'a.langLink',function(){
+    $('#listResults').on("click",'.langLink',function(){
         var pageName = $(this).text();
         var wikiLang = $(this).attr("id")
         fillContent(pageName,wikiLang);
     });
 
-    $(document).on("click",'a.transAbbrvLink',function(){
+    $('#listResults').on("click",'.transAbbrvLink',function(){
         langAbbr = $(this).text();
         personalLangs.push(langAbbr);
         $(this).attr('class','transAbbrvLinkPersonal');
     });
 
-    $(document).on("click",'a.transAbbrvLinkPersonal',function(){
+    $('#listResults').on("click",'.transAbbrvLinkPersonal',function(){
         var langAbbr = $(this).text();
         var index = personalLangs.indexOf(langAbbr);
         personalLangs.splice(index,1);
@@ -188,17 +195,19 @@ $(document).ready(function(){
     });
 
 
-// >>>>>>>>>>>>>>>> EXPLAIN
+// >>>>>>>>>>>>>>>> EXPLAIN events
 
-    $("#translatePage").on("click",function(){
+    $("#subheaderExplain").on("click", '#translateWikipage' , function(){
         var pageName = $(this).find("span").attr("id");
         var pageLang =  $(this).find("span").attr("id2");
+
         $("#searchString").val(pageName);
         $("#searchLang").val(pageLang);
         searchAhead(pageName,pageLang);
         translateWord(pageName,pageLang);
         fillContent(pageName,pageLang);
     });
+
 
     // intercept clicks on pageContent div //
     $("#pageContent").click(function(event){
@@ -245,14 +254,6 @@ $(document).ready(function(){
 
     // LANGUAGE LIST FUNCTIONS //
 
-    // measure the lenght of an array object
-    function lengthArray(obj) {
-        var c = 0;
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) ++c;
-        }
-        return c;
-    }
 
     function setupLangs(){
         var file = "https://googledrive.com/host/0B_O653No3NwoQUZmQkNYajZLdTg/langConf.xml";
@@ -329,6 +330,43 @@ $(document).ready(function(){
         $("#searchLang").val("en");
     }
 
+    // GENERAL FUNCTIONS PAGE //
+
+        function updateUniqueURL(){
+            // https://rosspenman.com/pushstate-jquery/
+            // ask all modules for their variables
+            // string them together
+            // add them to the URL
+            // SAMPLE: history.pushState({id: 'uniqueIDhere'}, '', 'feliciano&id=venado&ls=ca&33405734573498534');
+
+        }
+
+
+
+        function capitalise(str) {
+            var split = str.split(" ");
+            var result = new Array();
+            for (i = 0, len = split.length; i < len; i++) {
+                component = split[i];
+                result.push(component.substring(0, 1).toUpperCase());
+                result.push(component.substring(1));
+                if (i < (len-1)){
+                    result.push(" "); // put space back in except the final space
+                }
+            }
+            var newString = result.join("");
+            return newString;
+        };
+
+        // measure the lenght of an array object
+        function lengthArray(obj) {
+            var c = 0;
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) ++c;
+            }
+            return c;
+        }
+
 
     // FUNCTIONS LOAD PAGE //
 
@@ -344,7 +382,7 @@ $(document).ready(function(){
             success: function(data){
                 titlePage = data.query['random'][0].title;
                 $("#searchString").val(titlePage);
-                searchAhead();
+                searchAhead(titlePage,lang);
                 translateWord();
                 fillContent();
             },
@@ -353,11 +391,11 @@ $(document).ready(function(){
         });
     }
 
+    // ****  GET WIKIPEDIA SEARCH RESULTS  ******
 
     // getSearchLang from search pull down
     function getSearchLang(){
         var lang = $("#searchLang").find(":selected").val();
-        //alert ("We are going to search in " + lang);
         if (lang == null){
             return("en"); // EN is the default
         } else {
@@ -365,10 +403,7 @@ $(document).ready(function(){
         };
     }
 
-
-    // ****  GET WIKIPEDIA SEARCH RESULTS  ******
-
-    function searchAhead(varName,varLang){
+    function searchAhead(varName, varLang){
         // SAMPLE: https://en.wikipedia.org/w/api.php?format=json&action=query&list=allpages&apfrom=pie&aplimit=20
         //$("#searchResults").text("");
 
@@ -391,6 +426,9 @@ $(document).ready(function(){
         } else {
             var tempSearchResult = varName;
         };
+
+        // Capitalize all words
+        tempSearchResult = capitalise(tempSearchResult);
 
         if (tempSearchResult.length > 0) {
             var fullUrl = "https://" + lang + ".wikipedia.org/w/api.php?format=json&action=query&list=allpages&apfrom=" + tempSearchResult + "&aplimit=100"
@@ -517,7 +555,7 @@ $(document).ready(function(){
                                     }else{
                                         wikisizeLabelHTML='';
                                     }
-                                    $("#listResults").append(wikisizeLabelHTML + '<div class="langLabel"><a href="#" class="transAbbrvLink">' + sortedList[i][0] +'</a> <a href="#" class="langLink" id="'+ sortedList[i][0] +'">'+ sortedList[i][1] +'</a></div>');
+                                    $("#listResults").append(wikisizeLabelHTML + '<div class="langLabel"><a href="#" class="transAbbrvLink" lang="'+ sortedList[i][0] + '" fullLang="'+ findLangAbbr(sortedList[i][0]) + '" >' + sortedList[i][0] +'</a><a href="#" class="langLink" id="'+ sortedList[i][0] +'">'+ sortedList[i][1] +'</a></div>');
                                 }
                             break;
 
@@ -537,7 +575,7 @@ $(document).ready(function(){
                                     }else{
                                         LangFamilyHTML='';
                                     };
-                                    $("#listResults").append(LangFamilyHTML + '<div class="langLabel"><a href="#" class="transAbbrvLink">' + sortedList[i][0] +'</a> <a href="#" class="langLink" id="'+ sortedList[i][0] +'">'+ sortedList[i][1] +'</a></div>');
+                                    $("#listResults").append(LangFamilyHTML + '<div class="langLabel"><a href="#" class="transAbbrvLink" lang="'+ sortedList[i][0] + '" fullLang="'+ findLangAbbr(sortedList[i][0]) + '" >' + sortedList[i][0] +'</a> <a href="#" class="langLink" id="'+ sortedList[i][0] +'">'+ sortedList[i][1] +'</a></div>');
                                 }
                             break;
 
@@ -568,7 +606,7 @@ $(document).ready(function(){
                                     }else{
                                         LangSubFamilyHTML='';
                                     };
-                                    $("#listResults").append(LangFamilyHTML + LangSubFamilyHTML + '<div class="langLabel"><a href="#" class="transAbbrvLink">' + sortedList[i][0] +'</a> <a href="#" class="langLink" id="'+ sortedList[i][0] +'">'+ sortedList[i][1] +'</a></div>');
+                                    $("#listResults").append(LangFamilyHTML + LangSubFamilyHTML + '<div class="langLabel"><a href="#" class="transAbbrvLink" lang="'+ sortedList[i][0] + '" fullLang="'+ findLangAbbr(sortedList[i][0]) + '" >' + sortedList[i][0] +'</a><a href="#" class="langLink" id="'+ sortedList[i][0] +'">'+ sortedList[i][1] +'</a></div>');
                                 }
                             break;
 
@@ -675,11 +713,13 @@ $(document).ready(function(){
                 if (found != null){
                     $('#wikiImages').show();
                     for(u=0;u<found.length;u++){
-                        theSource = found[u].src.replace("file://","");
+                        var $found = $(found[u]);
+                        var $Source = $found.attr('src');
                         var linkHTMLopen = '';
                         var linkHTMLclose = '';
-                         if (found[u].srcset != null){
-                            srcSetArray = found[u].srcset.split(" ");
+                        var $srcSet = $found.attr('srcset');
+                         if ($srcSet != null){
+                            srcSetArray = $srcSet.split(" ");
                             fullRes = srcSetArray[2];
                             if (fullRes != null){
                                 fullRes = fullRes.replace("//","http://");
@@ -687,7 +727,7 @@ $(document).ready(function(){
                                 var linkHTMLclose = '</a>';
                             }
                         }
-                        $wikiImagesGallery.append('<div class="wikiImageFrame">'+ linkHTMLopen + '<img src="https://' + theSource + '" class="wikiImage"></img>'+ linkHTMLclose + '</div>');
+                        $wikiImagesGallery.append('<div class="wikiImageFrame">'+ linkHTMLopen + '<img src="https:' + $Source + '" class="wikiImage"></img>'+ linkHTMLclose + '</div>');
                     }
                     $('#wikiImgCounter').text(' ('+found.length+')');
                 } else {
@@ -738,10 +778,10 @@ $(document).ready(function(){
                 $("#pageContent").append(text + "</br>");
 
                 // Add header on top of translated page
-                $translatePage = $("#translatePage");
-                $translatePage.text("");
-                $translatePage.append('<b><a href="'+ wikipediaLink + '" target="_new">' + title + '</a></b> in '+ findLangAbbr(lang) +'<b></b> ');
-                $translatePage.append('<a href="#"><span id="'+ title +'" id2="'+ lang +'">[translate]</span></a>');
+                $subheaderExplain = $("#subheaderExplain");
+                $subheaderExplain.text("");
+                $subheaderExplain.append('<b><a href="'+ wikipediaLink + '" target="_new">' + title + '</a></b> in '+ findLangAbbr(lang) +'<b></b> ');
+                $subheaderExplain.append('<a id="translateWikipage" href="#"><span id="'+ title +'" id2="'+ lang +'">[translate]</span></a>');
 
                 //Set pixel height of explain Div
                 setExplainHeight();

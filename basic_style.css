@@ -333,7 +333,7 @@ img{
     background-color: #15BFA6;
 }
 
-#translatePage{
+#subheaderExplain{
     padding-bottom: 5px;
     border-color: #D2D2D2;
     border-style: dotted;
@@ -343,7 +343,7 @@ img{
     padding-top: 3px;
 }
 
-#translatePage a:link, a:hover, a:active {
+#subheaderExplain a:link, a:hover, a:active {
     color: #15BFA6;
 }
 
